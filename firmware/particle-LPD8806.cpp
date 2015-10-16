@@ -64,7 +64,7 @@ a 'latch' anyway.
   Tested.  Confirmed.  Fact.
 */
 
-#include "LPD8806.h"
+#include "particle-LPD8806.h"
 
 #ifdef __AVR_ATtiny85__
 
