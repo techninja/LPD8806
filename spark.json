@@ -2,6 +2,6 @@
   "name": "particle-LPD8806",
   "author": "Adafruit <info@adafruit.com>",
   "license": "MIT",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Arduino library for LED strips and pixels using LPD8806 (and probably LPD8803/LPD8809)"
 }

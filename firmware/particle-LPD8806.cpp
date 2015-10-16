@@ -64,8 +64,6 @@ a 'latch' anyway.
   Tested.  Confirmed.  Fact.
 */
 
-#include "particle-LPD8806.h"
-
 #define spi_out(n) (void)SPI.transfer(n)
 
 /*****************************************************************************/
