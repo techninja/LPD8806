@@ -66,47 +66,9 @@ a 'latch' anyway.
 
 #include "particle-LPD8806.h"
 
-#ifdef __AVR_ATtiny85__
-
-// Teensy/Gemma-specific stuff for hardware-assisted SPI @ 2 MHz
-
-#if(F_CPU > 8000000L)
-  #define SPI_DELAY asm volatile("rjmp .+0"); // Burn 2 cycles
-#elif(F_CPU > 4000000L)
-  #define SPI_DELAY asm volatile("nop");      // Burn 1 cycle
-#else
-  #define SPI_DELAY                           // Run max speed
-#endif
-
-#define SPIBIT                                  \
-  USICR = ((1<<USIWM0)|(1<<USITC));             \
-  SPI_DELAY                                     \
-  USICR = ((1<<USIWM0)|(1<<USITC)|(1<<USICLK)); \
-  SPI_DELAY
-
-static void spi_out(uint8_t n) {
-  USIDR = n;
-  SPIBIT
-  SPIBIT
-  SPIBIT
-  SPIBIT
-  SPIBIT
-  SPIBIT
-  SPIBIT
-  SPIBIT
-}
-
-#else
-
-// All other boards support Full and Proper Hardware SPI
-
-#include <SPI.h>
 #define spi_out(n) (void)SPI.transfer(n)
 
-#endif
-
 /*****************************************************************************/
-
 // Constructor for use with hardware SPI (specific clock/data pins):
 LPD8806::LPD8806(uint16_t n) {
   pixels = NULL;
@@ -158,11 +120,7 @@ void LPD8806::updatePins(uint8_t dpin, uint8_t cpin) {
   if(begun == true) { // If begin() was previously invoked...
     // If previously using hardware SPI, turn that off:
     if(hardwareSPI) {
-#ifdef __AVR_ATtiny85__
-      DDRB &= ~(_BV(PORTB1) | _BV(PORTB2));
-#else
       SPI.end();
-#endif
     } else {
       pinMode(datapin, INPUT); // Restore prior data and clock pins to inputs
       pinMode(clkpin , INPUT);
@@ -195,11 +153,7 @@ void LPD8806::startSPI(void) {
   // SPI bus is run at 2MHz.  Although the LPD8806 should, in theory,
   // work up to 20MHz, the unshielded wiring from the Arduino is more
   // susceptible to interference.  Experiment and see what you get.
- #if defined(__AVR__) || defined(CORE_TEENSY)
-  SPI.setClockDivider(SPI_CLOCK_DIV8);
- #else
-  SPI.setClockDivider((F_CPU + 1000000L) / 2000000L);
- #endif
+  SPI.setClockDivider(SPI_CLK_ARDUINO);
 #endif
 
   // Issue initial latch/reset to strip:
