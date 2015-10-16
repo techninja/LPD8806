@@ -1,8 +1,4 @@
-#include "LPD8806.h"
-#include "SPI.h" // Comment out this line if using Trinket or Gemma
-#ifdef __AVR_ATtiny85__
- #include <avr/power.h>
-#endif
+#include "particle-LPD8806/particle-LPD8806"
 
 // Example to control LPD8806-based RGB LED Modules in a strip
 
@@ -11,22 +7,12 @@
 // Number of RGB LEDs in strand:
 int nLEDs = 32;
 
-// Chose 2 pins for output; can be any valid output pins:
-int dataPin  = 2;
-int clockPin = 3;
-
 // First parameter is the number of LEDs in the strand.  The LED strips
-// are 32 LEDs per meter but you can extend or cut the strip.  Next two
-// parameters are SPI data and clock pins:
-LPD8806 strip = LPD8806(nLEDs, dataPin, clockPin);
-
-// You can optionally use hardware SPI for faster writes, just leave out
-// the data and clock pin parameters.  But this does limit use to very
-// specific pins on the Arduino.  For "classic" Arduinos (Uno, Duemilanove,
-// etc.), data = pin 11, clock = pin 13.  For Arduino Mega, data = pin 51,
-// clock = pin 52.  For 32u4 Breakout Board+ and Teensy, data = pin B2,
-// clock = pin B1.  For Leonardo, this can ONLY be done on the ICSP pins.
-//LPD8806 strip = LPD8806(nLEDs);
+// are 32 LEDs per meter but you can extend or cut the strip.
+// Connect to the SPI pins
+//   * A5 for Data Input [DI]
+//   * A3 for Clock Input [CI]
+LPD8806 strip = LPD8806(nLEDs);
 
 void setup() {
 #if defined(__AVR_ATtiny85__) && (F_CPU == 16000000L)
@@ -73,21 +59,21 @@ void loop() {
 
 void rainbow(uint8_t wait) {
   int i, j;
-   
+
   for (j=0; j < 384; j++) {     // 3 cycles of all 384 colors in the wheel
     for (i=0; i < strip.numPixels(); i++) {
       strip.setPixelColor(i, Wheel( (i + j) % 384));
-    }  
+    }
     strip.show();   // write all the pixels out
     delay(wait);
   }
 }
 
-// Slightly different, this one makes the rainbow wheel equally distributed 
+// Slightly different, this one makes the rainbow wheel equally distributed
 // along the chain
 void rainbowCycle(uint8_t wait) {
   uint16_t i, j;
-  
+
   for (j=0; j < 384 * 5; j++) {     // 5 cycles of all 384 colors in the wheel
     for (i=0; i < strip.numPixels(); i++) {
       // tricky math! we use each pixel as a fraction of the full 384-color wheel
@@ -95,7 +81,7 @@ void rainbowCycle(uint8_t wait) {
       // Then add in j which makes the colors go around per pixel
       // the % 384 is to make the wheel cycle around
       strip.setPixelColor(i, Wheel( ((i * 384 / strip.numPixels()) + j) % 384) );
-    }  
+    }
     strip.show();   // write all the pixels out
     delay(wait);
   }
@@ -138,9 +124,9 @@ void theaterChase(uint32_t c, uint8_t wait) {
         strip.setPixelColor(i+q, c);    //turn every third pixel on
       }
       strip.show();
-     
+
       delay(wait);
-     
+
       for (int i=0; i < strip.numPixels(); i=i+3) {
         strip.setPixelColor(i+q, 0);        //turn every third pixel off
       }
@@ -156,9 +142,9 @@ void theaterChaseRainbow(uint8_t wait) {
           strip.setPixelColor(i+q, Wheel( (i+j) % 384));    //turn every third pixel on
         }
         strip.show();
-       
+
         delay(wait);
-       
+
         for (int i=0; i < strip.numPixels(); i=i+3) {
           strip.setPixelColor(i+q, 0);        //turn every third pixel off
         }
@@ -179,17 +165,17 @@ uint32_t Wheel(uint16_t WheelPos)
       r = 127 - WheelPos % 128;   //Red down
       g = WheelPos % 128;      // Green up
       b = 0;                  //blue off
-      break; 
+      break;
     case 1:
       g = 127 - WheelPos % 128;  //green down
       b = WheelPos % 128;      //blue up
       r = 0;                  //red off
-      break; 
+      break;
     case 2:
-      b = 127 - WheelPos % 128;  //blue down 
+      b = 127 - WheelPos % 128;  //blue down
       r = WheelPos % 128;      //red up
       g = 0;                  //green off
-      break; 
+      break;
   }
   return(strip.Color(r,g,b));
 }
